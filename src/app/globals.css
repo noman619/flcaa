@@ -1,26 +1,622 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* =========================================================================
+   DESIGN TOKENS
+   A single system: cool slate ink, teal brand, coral accent, warm paper
+   canvas. Every surface in the product is composed from these.
+   ========================================================================= */
+@theme {
+  /* ============================================================
+     Palette drawn from the wordmark: navy letterforms, the red of
+     "License", and the green of the play mark. Navy carries almost
+     everything; red and green are used sparingly, as punctuation.
+     ============================================================ */
+
+  /* ---- Ink: navy-tinted neutrals. Never pure black. ---- */
+  --color-ink-50: #f7f8fa;
+  --color-ink-100: #eef1f5;
+  --color-ink-200: #dee3ea;
+  --color-ink-300: #c3cbd7;
+  --color-ink-400: #97a3b4;
+  --color-ink-500: #6e7c90;
+  --color-ink-600: #526073;
+  --color-ink-700: #3c4a5c;
+  --color-ink-800: #27354a;
+  --color-ink-900: #16273d;
+  --color-ink-950: #0d1b2c;
+
+  /* ---- Brand: the navy of the wordmark. ---- */
+  --color-brand-50: #eef3f9;
+  --color-brand-100: #d8e3f0;
+  --color-brand-200: #b3c7de;
+  --color-brand-300: #83a3c6;
+  --color-brand-400: #547da8;
+  --color-brand-500: #335c8a;
+  --color-brand-600: #244870;
+  --color-brand-700: #1c395b;
+  --color-brand-800: #182f4a;
+  --color-brand-900: #14273d;
+  --color-brand-950: #0b1727;
+
+  /* ---- Accent: the red of "License". One per view, never more. ---- */
+  --color-accent-50: #fdf2f3;
+  --color-accent-100: #fbe1e3;
+  --color-accent-200: #f6c3c8;
+  --color-accent-300: #ee959d;
+  --color-accent-400: #e26370;
+  --color-accent-500: #cf3b4c;
+  --color-accent-600: #b62b3c;
+  --color-accent-700: #982232;
+  --color-accent-800: #7d1f2c;
+  --color-accent-900: #681e29;
+
+  /* ---- Leaf: the green of the play mark. Confirmation only. ---- */
+  --color-leaf-50: #f1f8ec;
+  --color-leaf-100: #dff0d4;
+  --color-leaf-200: #c1e1ae;
+  --color-leaf-300: #9bcd80;
+  --color-leaf-400: #78b659;
+  --color-leaf-500: #5c9d3e;
+  --color-leaf-600: #467d2f;
+  --color-leaf-700: #386227;
+  --color-leaf-800: #2f4f22;
+  --color-leaf-900: #28421f;
+
+  /*
+   * ---- Gold ----
+   * The fourth step colour. Not a logo hue, so it is deliberately scoped to
+   * the numbered step runs in the resource guides and used nowhere else —
+   * the original guide graphics run gold/navy/green/red and dropping the gold
+   * loses the sequence's read.
+   */
+  --color-gold-100: #f4ead7;
+  --color-gold-200: #e7d3ae;
+  --color-gold-300: #d8b97f;
+  --color-gold-500: #c9a063;
+  --color-gold-600: #b98c4b;
+  --color-gold-700: #97713c;
+
+  /* ---- Paper: warm off-white surfaces and a cool secondary field. ---- */
+  --color-sand-50: #fbfaf8;
+  --color-sand-100: #f4f2ed;
+  --color-sand-200: #e9e5dc;
+  --color-mist-50: #f5f7fa;
+  --color-mist-100: #e9eef4;
+  --color-mist-200: #d9e2ec;
+
+  /* ---- Type ---- */
+  /*
+   * A single family. `--font-display` is kept as an alias so the ~115
+   * `font-display` call sites keep working — headings differ from body by
+   * scale and tracking now, not by typeface.
+   */
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+
+  /* ---- Radii: generous and soft, the way the reference reads. ---- */
+  --radius-card: 1.25rem;
+  --radius-panel: 1.75rem;
+  --radius-hero: 2.5rem;
+  /* Sits inside --radius-hero with 0.375rem of padding, so the curves nest. */
+  --radius-hero-inner: 2.125rem;
+  /* Every icon background on the site resolves to this one value. */
+  --radius-icon: 999px;
+
+  /* ---- Elevation: wide, low-opacity, tinted with the ink hue.
+          Layered rather than a single hard drop. ---- */
+  --shadow-xs: 0 1px 2px rgb(17 29 35 / 0.05);
+  --shadow-card:
+    0 1px 2px rgb(17 29 35 / 0.04), 0 8px 24px -12px rgb(17 29 35 / 0.12);
+  --shadow-card-hover:
+    0 2px 4px rgb(17 29 35 / 0.05), 0 24px 48px -16px rgb(17 29 35 / 0.20);
+  --shadow-pop:
+    0 2px 6px rgb(17 29 35 / 0.06), 0 32px 64px -20px rgb(17 29 35 / 0.28);
+  --shadow-float:
+    0 1px 2px rgb(17 29 35 / 0.04), 0 18px 40px -14px rgb(17 29 35 / 0.24);
+  --shadow-brand: 0 10px 30px -14px rgb(20 39 61 / 0.5);
+  --shadow-accent: 0 10px 30px -14px rgb(150 34 50 / 0.42);
+
+  /* ---- Motion: one easing curve, three durations. ---- */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --animate-fade-up: fade-up 0.7s var(--ease-out-soft) both;
+  --animate-fade-in: fade-in 0.5s var(--ease-out-soft) both;
+  --animate-rise: rise 0.9s var(--ease-out-soft) both;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* The hairline that draws itself across the top of an opening menu. */
+@keyframes draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+:root {
+  --background: var(--color-sand-50);
+  --foreground: var(--color-ink-900);
+}
+
+/* =========================================================================
+   BASE
+   ========================================================================= */
+@layer base {
+  * {
+    border-color: var(--color-ink-200);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    letter-spacing: -0.005em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* One focus treatment, everywhere. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  ::selection {
+    background: var(--color-brand-200);
+    color: var(--color-ink-900);
+  }
+
+  /*
+   * Headings are set at regular weight. Luxury typography earns its presence
+   * from scale, spacing and restraint — not from weight. Nothing on this site
+   * goes above 500.
+   */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    color: var(--color-ink-900);
+    text-wrap: balance;
+  }
+
+  /*
+   * A geometric sans needs more negative tracking than a serif at display
+   * sizes — otherwise large settings drift apart and lose their line.
+   */
+  h1 {
+    letter-spacing: -0.038em;
+    line-height: 1.06;
+  }
+  h2 {
+    letter-spacing: -0.032em;
+    line-height: 1.12;
+  }
+  h3 {
+    letter-spacing: -0.022em;
+    line-height: 1.24;
+  }
+  h4 {
+    letter-spacing: -0.016em;
+  }
+
+  strong,
+  b {
+    font-weight: 500;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Numerals line up in tables, prices and stat rows. */
+  table,
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* =========================================================================
+   COMPONENT PRIMITIVES
+   ========================================================================= */
+@layer components {
+  .container-page {
+    width: 100%;
+    margin-inline: auto;
+    max-width: 78rem;
+    padding-inline: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .container-page {
+      padding-inline: 2rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .container-page {
+      padding-inline: 2.5rem;
+    }
+  }
+
+  /* ---- Section eyebrow: small, widely tracked, never heavy. ---- */
+  .eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-brand-600);
+  }
+
+  /*
+   * One icon treatment for the whole product. Squircle tile, hairline ring,
+   * ink glyph — used for feature icons, contact rows, empty states and menu
+   * markers so nothing invents its own shape.
+   */
+  .icon-tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-icon);
+    background: var(--color-brand-50);
+    color: var(--color-brand-700);
+    box-shadow: inset 0 0 0 1px var(--color-brand-100);
+    transition: background-color 0.3s var(--ease-out-soft),
+      color 0.3s var(--ease-out-soft);
+  }
+
+  .icon-tile-lg {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .icon-tile-xl {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .icon-tile-solid {
+    background: var(--color-brand-800);
+    color: #fff;
+    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.1);
+  }
+
+  /* ---- Menu link: the mega-menu's only interactive treatment. ---- */
+  .menu-link {
+    position: relative;
+    display: block;
+    padding: 0.625rem 0;
+    font-size: 0.875rem;
+    line-height: 1.35;
+    color: var(--color-ink-600);
+    transition: color 0.25s var(--ease-out-soft);
+  }
+  /* Gated like Tailwind's own hover variants, so it never sticks on touch. */
+  @media (hover: hover) {
+    .menu-link:hover {
+      color: var(--color-ink-900);
+    }
+  }
+
+  /*
+   * ---- Mobile drawer row ----
+   * Every row in the drawer, at both levels. Larger hit area than .menu-link
+   * because it is touched rather than pointed at.
+   */
+  .mobile-link {
+    display: block;
+    border-radius: 0.375rem;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--color-ink-700);
+    transition: background-color 0.25s var(--ease-out-soft);
+  }
+  @media (hover: hover) {
+    .mobile-link:hover {
+      background-color: var(--color-ink-50);
+    }
+  }
+
+  /* ---- Hairline rule used to separate bands without a hard border. ---- */
+  .hairline {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--color-ink-200) 18%,
+      var(--color-ink-200) 82%,
+      transparent
+    );
+  }
+
+  /*
+   * Surfaces are flat colour. Coloured radial washes and masked grids were
+   * removed deliberately — they are the signature of generated layouts. Depth
+   * here comes from surface changes and hairlines, not from glow.
+   */
+
+  /* ---- Frosted panel, used for floating info cards over imagery. ---- */
+  .glass {
+    background: rgb(255 255 255 / 0.82);
+    backdrop-filter: blur(14px) saturate(150%);
+    border: 1px solid rgb(255 255 255 / 0.7);
+  }
+
+  /* ---- Fine top highlight that makes dark surfaces feel lit. ---- */
+  .lit-top {
+    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.08);
+  }
+
+  /* ---- Entrance motion.
+          Desktop: one entrance on load. Not scroll-driven — a view() timeline
+          resolves against the nearest scrollport, and any `overflow-hidden`
+          ancestor becomes one, pinning the element at 0% progress and
+          invisible for good. ---- */
+  @media (min-width: 64rem) and (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: rise 0.8s var(--ease-out-soft) both;
+    }
+  }
+
+  /* ---- Mobile and tablet: reveal as each block scrolls in.
+          Touch devices never fire hover, so motion has to come from scroll.
+
+          The hidden state is scoped to `html.reveal-ready`, a class the
+          observer sets only once it is actually running. If the script never
+          loads, nothing is ever hidden — content failing to appear is a far
+          worse outcome than motion failing to play. ---- */
+  @media (max-width: 63.999rem) and (prefers-reduced-motion: no-preference) {
+    :root.reveal-ready .reveal {
+      opacity: 0;
+      transform: translate3d(0, 18px, 0);
+      transition:
+        opacity 0.55s var(--ease-out-soft),
+        transform 0.55s var(--ease-out-soft);
+      will-change: opacity, transform;
+    }
+
+    :root.reveal-ready .reveal[data-revealed="true"] {
+      opacity: 1;
+      transform: none;
+      will-change: auto;
+    }
+  }
+
+  /* ---- Long-form copy: blog bodies, lesson text, legal pages. ---- */
+  .prose-flca {
+    color: var(--color-ink-600);
+    font-size: 1.0625rem;
+    line-height: 1.75;
+  }
+  .prose-flca > * + * {
+    margin-top: 1.15em;
+  }
+  .prose-flca h2 {
+    font-size: 1.625rem;
+    margin-top: 2.4em;
+    margin-bottom: -0.4em;
+  }
+  .prose-flca h3 {
+    font-size: 1.25rem;
+    margin-top: 1.9em;
+    margin-bottom: -0.5em;
+  }
+  .prose-flca a {
+    color: var(--color-brand-700);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: color 0.2s var(--ease-out-soft);
+  }
+  @media (hover: hover) {
+    .prose-flca a:hover {
+      color: var(--color-brand-800);
+    }
+  }
+  .prose-flca strong {
+    color: var(--color-ink-900);
+    font-weight: 600;
+  }
+  .prose-flca ul,
+  .prose-flca ol {
+    padding-left: 1.4rem;
+  }
+  .prose-flca ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  .prose-flca ul > li {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  .prose-flca ul > li::before {
+    content: "";
+    position: absolute;
+    left: 0.25rem;
+    top: 0.72em;
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 999px;
+    background: var(--color-brand-400);
+  }
+  .prose-flca ol {
+    list-style: decimal;
+  }
+  .prose-flca li + li {
+    margin-top: 0.45em;
+  }
+  /*
+   * Prose on a dark field. Only the colours that are hard-coded for a light
+   * background need restating — the rest of .prose-flca is geometry, which
+   * does not care what it sits on. The text colour itself comes from a utility
+   * at the call site, so it stays adjustable per surface.
+   */
+  .prose-flca-dark a {
+    color: var(--color-white);
+    text-decoration-color: color-mix(in srgb, var(--color-white) 40%, transparent);
+  }
+  @media (hover: hover) {
+    .prose-flca-dark a:hover {
+      color: var(--color-white);
+      text-decoration-color: var(--color-white);
+    }
+  }
+  .prose-flca-dark strong {
+    color: var(--color-white);
+  }
+  .prose-flca-dark ul > li::before {
+    background: color-mix(in srgb, var(--color-white) 45%, transparent);
+  }
+  .prose-flca-dark blockquote {
+    border-left-color: color-mix(in srgb, var(--color-white) 30%, transparent);
+    color: color-mix(in srgb, var(--color-white) 75%, transparent);
+  }
+
+  .prose-flca blockquote {
+    border-left: 2px solid var(--color-accent-300);
+    padding-left: 1.15rem;
+    color: var(--color-ink-700);
+    font-style: normal;
+  }
+  .prose-flca code {
+    background: var(--color-ink-100);
+    color: var(--color-ink-800);
+    padding: 0.15em 0.4em;
+    border-radius: 6px;
+    font-size: 0.875em;
+  }
+  .prose-flca table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.95em;
+    border: 1px solid var(--color-ink-200);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+  .prose-flca th,
+  .prose-flca td {
+    border-bottom: 1px solid var(--color-ink-200);
+    padding: 0.7rem 1rem;
+    text-align: left;
+  }
+  .prose-flca tr:last-child td {
+    border-bottom: 0;
+  }
+  .prose-flca th {
+    background: var(--color-ink-50);
+    font-weight: 600;
+    color: var(--color-ink-900);
+    font-size: 0.8125rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .prose-flca img {
+    border-radius: var(--radius-card);
+    max-width: 100%;
+    height: auto;
+  }
+  .prose-flca hr {
+    border: 0;
+    height: 1px;
+    background: var(--color-ink-200);
+    margin-block: 2.5em;
+  }
+}
+
+/* Honour reduced-motion globally. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Certificates print on one clean page. */
+@media print {
+  .print\:hidden {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+}
+
+/*
+ * Chart columns grow from the baseline on first paint.
+ *
+ * `transform: scaleY` rather than animating height, so it runs on the
+ * compositor and never reflows the section. Gated on reduced-motion: the bars
+ * are data, and someone who opts out of motion still gets them at full size.
+ */
+@keyframes bar-rise {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bar-rise {
+    transform-origin: bottom;
+    animation: bar-rise 1.1s var(--ease-out-soft) both;
+  }
 }

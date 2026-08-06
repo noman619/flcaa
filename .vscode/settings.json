@@ -1,0 +1,19 @@
+{
+  // Tailwind v4 introduces at-rules the built-in CSS validator doesn't know
+  // (@theme, @utility, @custom-variant). Ignore just that rule rather than
+  // switching CSS validation off entirely — real CSS errors still surface.
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "less.lint.unknownAtRules": "ignore",
+
+  // Let Tailwind IntelliSense see classes passed through our helpers, so it
+  // can flag unknown or non-canonical utilities inside cn()/cva() too.
+  "tailwindCSS.classFunctions": ["cn", "cva", "clsx", "twMerge"],
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ],
+
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
+}
