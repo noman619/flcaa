@@ -136,7 +136,9 @@ export function CoursePicker({
       </div>
 
       <AuthForm
-        next={isAll ? next : `/courses/${chosen.slug}`}
+        /* The chosen course only tailors the copy — after signing in the
+           visitor lands where the action decides, not on a catalog page. */
+        next={next}
         initialError={initialError}
         initialEmail={initialEmail}
       />

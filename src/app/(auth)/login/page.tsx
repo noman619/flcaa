@@ -20,8 +20,9 @@ export default async function LoginPage({
     getCourses(),
   ]);
 
+  // Empty means "no particular destination" — the action picks by role.
   const safeNext =
-    next?.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+    next?.startsWith("/") && !next.startsWith("//") ? next : "";
 
   const options: LoginCourse[] = courses.map((c) => ({
     slug: c.slug,

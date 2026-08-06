@@ -4,15 +4,29 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth";
 import { SITE_URL } from "@/lib/env";
 
 export type AuthState = { error?: string; notice?: string };
 
-const safeNext = (value: FormDataEntryValue | null) => {
+/**
+ * The page the visitor asked for, or null when they just signed in from the
+ * login screen. Only same-origin relative paths are accepted — anything else
+ * is an open-redirect attempt.
+ */
+const requestedNext = (value: FormDataEntryValue | null) => {
   const next = typeof value === "string" ? value : "";
-  // Only allow same-origin relative paths — blocks open-redirect abuse.
-  return next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+  return next.startsWith("/") && !next.startsWith("//") ? next : null;
 };
+
+/**
+ * Where a signed-in user lands when they did not ask for a particular page.
+ * Students go to the home page; staff go to the tool they signed in to use.
+ */
+async function landingFor(): Promise<string> {
+  const user = await getCurrentUser();
+  return user?.profile?.role === "admin" ? "/admin" : "/";
+}
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email address."),
@@ -49,7 +63,7 @@ export async function loginAction(
   }
 
   revalidatePath("/", "layout");
-  redirect(safeNext(formData.get("next")));
+  redirect(requestedNext(formData.get("next")) ?? (await landingFor()));
 }
 
 /**
@@ -97,7 +111,7 @@ export async function signupAction(
   }
 
   revalidatePath("/", "layout");
-  redirect(safeNext(formData.get("next")));
+  redirect(requestedNext(formData.get("next")) ?? (await landingFor()));
 }
 
 export async function forgotPasswordAction(
