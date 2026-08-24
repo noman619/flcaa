@@ -6,22 +6,41 @@ import { ArrowLeft } from "lucide-react";
 import { Select } from "@/components/ui/input";
 import { AuthForm } from "../auth-form";
 
-export type LoginCourse = { slug: string; title: string; track: string };
+/**
+ * The three options the original's login page offers, in its order and with
+ * its wording.
+ *
+ * The original routes each to a different system: CAM and board members to its
+ * LMS, real estate to a second page that splits again by programme. We host
+ * authentication ourselves, so a track only tailors the copy — except real
+ * estate, which keeps the original's extra step because a visitor who followed
+ * it once will look for it again.
+ */
+export const LOGIN_TRACKS = [
+  { key: "cam", label: "CAM (Community Association Manager)" },
+  {
+    key: "real-estate",
+    label: "Real Estate Agent & Broker",
+    href: "/rea-estate-login-page",
+  },
+  { key: "board-members", label: "Association Board Members" },
+] as const;
 
 /**
- * Mirrors the original site's "select your course to login" entry point.
- *
- * The picker is a routing step only — it decides where the student lands
- * after authenticating. Credentials are still checked once, against the one
- * account, so a student who owns several courses does not need several logins.
+ * Labels for the sub-programmes on the real estate login page. They never
+ * appear in the dropdown — they arrive as ?course= from that page's buttons.
  */
+const SUB_TRACKS: Record<string, string> = {
+  "re-pre": "Pre-Licensing Course & Exam Prep",
+  "re-post": "Post-Licensing & Continuing Education",
+  "re-broker": "Broker Licensing & Post",
+};
+
 export function CoursePicker({
-  courses,
   next,
   initialError,
   initialEmail = "",
 }: {
-  courses: LoginCourse[];
   next: string;
   initialError?: string;
   initialEmail?: string;
@@ -30,22 +49,20 @@ export function CoursePicker({
   const searchParams = useSearchParams();
   const preselected = searchParams.get("course") ?? "";
 
-  const [slug, setSlug] = React.useState(preselected);
-  const chosen = courses.find((c) => c.slug === slug) ?? null;
-
-  // Group by track so the list reads the way the catalog does.
-  const groups = React.useMemo(() => {
-    const map = new Map<string, LoginCourse[]>();
-    for (const course of courses) {
-      const list = map.get(course.track) ?? [];
-      list.push(course);
-      map.set(course.track, list);
-    }
-    return [...map.entries()];
-  }, [courses]);
+  const [key, setKey] = React.useState(preselected);
+  const label =
+    LOGIN_TRACKS.find((t) => t.key === key && !("href" in t))?.label ??
+    SUB_TRACKS[key] ??
+    null;
 
   function select(value: string) {
-    setSlug(value);
+    const track = LOGIN_TRACKS.find((t) => t.key === value);
+    if (track && "href" in track) {
+      router.push(track.href);
+      return;
+    }
+
+    setKey(value);
     const params = new URLSearchParams(searchParams.toString());
     if (value) params.set("course", value);
     else params.delete("course");
@@ -55,14 +72,14 @@ export function CoursePicker({
     });
   }
 
-  if (!chosen) {
+  if (!label) {
     return (
       <div>
         <div className="mb-8">
-          <h1 className="font-display text-3xl">Hey, good to see you again</h1>
+          <h1 className="font-display text-3xl">Hey, Good to see you again!</h1>
           <p className="mt-2 text-sm text-ink-500">
-            Choose the course you want to open. You&apos;ll sign in once and land
-            straight on it.
+            Choose what you study with us. You&apos;ll sign in once — one
+            account covers every course you own.
           </p>
         </div>
 
@@ -80,37 +97,20 @@ export function CoursePicker({
         </label>
         <Select
           id="course"
-          value={slug}
+          value=""
           onChange={(e) => select(e.target.value)}
           className="h-12"
         >
-          <option value="">Choose a course…</option>
-          {groups.map(([track, list]) => (
-            <optgroup key={track} label={track}>
-              {list.map((course) => (
-                <option key={course.slug} value={course.slug}>
-                  {course.title}
-                </option>
-              ))}
-            </optgroup>
+          <option value="">SELECT YOUR COURSE TO LOGIN</option>
+          {LOGIN_TRACKS.map((track) => (
+            <option key={track.key} value={track.key}>
+              {track.label}
+            </option>
           ))}
         </Select>
-
-        <p className="mt-6 text-sm text-ink-500">
-          Not sure which one?{" "}
-          <button
-            type="button"
-            onClick={() => select("__all__")}
-            className="font-medium text-brand-700 underline underline-offset-4 hover:text-brand-900"
-          >
-            Sign in and show me everything I own
-          </button>
-        </p>
       </div>
     );
   }
-
-  const isAll = chosen.slug === "__all__";
 
   return (
     <div>
@@ -125,10 +125,10 @@ export function CoursePicker({
 
       <div className="mb-8">
         <p className="text-[11px] tracking-[0.2em] text-brand-600 uppercase">
-          {isAll ? "All courses" : chosen.track}
+          {label}
         </p>
         <h1 className="mt-2 font-display text-3xl">
-          {isAll ? "Welcome back" : chosen.title}
+          Hey, Good to see you again!
         </h1>
         <p className="mt-2 text-sm text-ink-500">
           Sign in to continue. One account covers every course you own.
@@ -136,7 +136,7 @@ export function CoursePicker({
       </div>
 
       <AuthForm
-        /* The chosen course only tailors the copy — after signing in the
+        /* The chosen track only tailors the copy — after signing in the
            visitor lands where the action decides, not on a catalog page. */
         next={next}
         initialError={initialError}

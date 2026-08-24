@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { getCourses } from "@/lib/queries";
-import { CoursePicker, type LoginCourse } from "./course-picker";
+import { CoursePicker } from "./course-picker";
 
 export const metadata: Metadata = {
   title: "Log in",
@@ -15,26 +14,15 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ next?: string; error?: string; email?: string }>;
 }) {
-  const [{ next, error, email }, courses] = await Promise.all([
-    searchParams,
-    getCourses(),
-  ]);
+  const { next, error, email } = await searchParams;
 
   // Empty means "no particular destination" — the action picks by role.
-  const safeNext =
-    next?.startsWith("/") && !next.startsWith("//") ? next : "";
-
-  const options: LoginCourse[] = courses.map((c) => ({
-    slug: c.slug,
-    title: c.title,
-    track: c.track?.name ?? "Courses",
-  }));
+  const safeNext = next?.startsWith("/") && !next.startsWith("//") ? next : "";
 
   return (
     // useSearchParams needs a Suspense boundary during prerender.
     <Suspense fallback={<div className="h-64" />}>
       <CoursePicker
-        courses={options}
         next={safeNext}
         initialError={error}
         initialEmail={email ?? ""}
