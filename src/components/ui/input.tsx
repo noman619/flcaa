@@ -33,10 +33,15 @@ export function Textarea({
 
 export function Select({
   className,
+  ref,
   ...props
-}: React.SelectHTMLAttributes<HTMLSelectElement>) {
+}: React.SelectHTMLAttributes<HTMLSelectElement> & {
+  /** So a caller can reset the field — React 19 passes refs as a prop. */
+  ref?: React.Ref<HTMLSelectElement>;
+}) {
   return (
     <select
+      ref={ref}
       className={cn(fieldStyles, "h-11 appearance-none bg-no-repeat pr-10", className)}
       style={{
         backgroundImage:

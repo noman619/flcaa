@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, X } from "lucide-react";
 import { Select } from "@/components/ui/input";
 import { AuthForm } from "../auth-form";
 
@@ -59,6 +59,13 @@ export function CoursePicker({
    * should put them back at the question, not halfway through the answer.
    */
   const [showProgrammes, setShowProgrammes] = React.useState(false);
+  const selectRef = React.useRef<HTMLSelectElement>(null);
+
+  /** Closing puts the question back the way it was asked. */
+  function closeProgrammes() {
+    setShowProgrammes(false);
+    if (selectRef.current) selectRef.current.value = "";
+  }
 
   /*
    * Every option leaves for an external system, so the form would be
@@ -127,6 +134,7 @@ export function CoursePicker({
         Select your course to login
       </label>
       <Select
+        ref={selectRef}
         id="course"
         defaultValue=""
         onChange={select}
@@ -152,9 +160,20 @@ export function CoursePicker({
             aria-hidden
           />
 
-          <p className="relative text-[10px] tracking-[0.28em] text-white/45 uppercase">
-            Real estate login
-          </p>
+          <div className="relative flex items-start justify-between gap-4">
+            <p className="text-[10px] tracking-[0.28em] text-white/45 uppercase">
+              Real estate login
+            </p>
+
+            <button
+              type="button"
+              onClick={closeProgrammes}
+              aria-label="Close"
+              className="-mt-1.5 -mr-1.5 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-white/50 transition-[background-color,color] duration-200 hover:bg-white/10 hover:text-white"
+            >
+              <X className="size-4" aria-hidden />
+            </button>
+          </div>
           <p className="relative mt-3 text-[15px] leading-relaxed text-white/80">
             Which programme are you signing in to?
           </p>
